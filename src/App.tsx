@@ -212,21 +212,35 @@ export default function App() {
   const rotateX = useSpring(useTransform(mouseY, [0, 1], [-10, -40]), { stiffness: 80, damping: 25 });
   const rotateY = useSpring(useTransform(mouseX, [0, 1], [-15, -55]), { stiffness: 80, damping: 25 });
 
+  // Calculate scale based on screen width to ensure it fits between FW text and right sidebar
+  // The cube needs more aggressive scaling on smaller screens to stay centered without overlapping
+  const getScale = () => {
+    const width = windowSize.width;
+    if (width > 1400) return 1;
+    if (width > 1200) return 0.85;
+    if (width > 1000) return 0.7;
+    if (width > 800) return 0.55;
+    if (width > 600) return 0.45;
+    return Math.max(0.25, width / 2000); // Very small screens (mobile)
+  };
+  
+  const baseScale = getScale();
+
   return (
     <div className="relative w-screen h-screen bg-[#000000] text-[#888] overflow-hidden font-sans selection:bg-[#FF3300] selection:text-white">
       {/* Top Left Text */}
-      <div className="absolute top-8 left-12 text-[11px] tracking-wider text-[#888] z-50">
-        1304px × 801px
+      <div className="hidden md:block absolute top-8 left-12 text-[11px] tracking-wider text-[#888] z-50">
+        {windowSize.width}px × {windowSize.height}px
       </div>
 
       {/* Top Nav */}
-      <nav className="absolute top-8 left-1/2 -translate-x-1/2 flex gap-2 text-[11px] tracking-widest z-50">
+      <nav className="absolute top-8 left-1/2 -translate-x-1/2 flex gap-2 text-[10px] md:text-[11px] tracking-widest z-50">
         <span className="text-white cursor-pointer">精选作品</span>
         <span className="text-[#888] cursor-pointer hover:text-white transition-colors">档案 , 关于</span>
       </nav>
 
       {/* Left Metadata */}
-      <div className="absolute left-12 top-[50%] -translate-y-1/2 flex gap-16 text-[11px] tracking-wider leading-relaxed z-20 mix-blend-difference text-[#888]">
+      <div className="absolute left-6 md:left-12 top-[15%] md:top-[50%] md:-translate-y-1/2 flex flex-col md:flex-row gap-4 md:gap-16 text-[10px] md:text-[11px] tracking-wider leading-relaxed z-20 mix-blend-difference text-[#888]">
         <div>
           <p className="mb-1">科伦丁·贝尔纳杜</p>
           <p>自由开发者</p>
@@ -238,18 +252,18 @@ export default function App() {
       </div>
 
       {/* Giant FW Text */}
-      <div className="absolute bottom-[-5%] left-12 z-0 pointer-events-none">
-        <h1 className="text-[28vw] font-light text-[#FF3300] leading-none tracking-tighter m-0 p-0 select-none" style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}>
+      <div className="absolute bottom-[-2%] md:bottom-[-5%] left-6 md:left-12 z-0 pointer-events-none opacity-50 md:opacity-100">
+        <h1 className="text-[40vw] md:text-[28vw] font-light text-[#FF3300] leading-none tracking-tighter m-0 p-0 select-none" style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}>
           FW
         </h1>
       </div>
 
       {/* Right Sidebar List */}
       <div 
-        className="absolute right-12 top-0 h-full w-[320px] z-20 pointer-events-auto overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        className="absolute right-2 md:right-6 top-0 h-full w-[120px] md:w-[280px] z-20 pointer-events-auto overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         style={{ maskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)', WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)' }}
       >
-        <div className="flex flex-col text-[13px] tracking-widest py-[45vh]">
+        <div className="flex flex-col text-[11px] md:text-[13px] tracking-widest py-[45vh]">
           {articles.map((article, i) => {
             const distance = hoveredArticle !== null ? Math.abs(hoveredArticle - i) : null;
             
@@ -300,12 +314,6 @@ export default function App() {
                 >
                   {article.title}
                 </span>
-                {article.date && (
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-[#FF3300]" />
-                    <span className="text-[#888] text-[11px]">{article.date}</span>
-                  </div>
-                )}
               </a>
             );
           })}
@@ -324,11 +332,12 @@ export default function App() {
             transformStyle: "preserve-3d" 
           }}
           animate={{
-            scale: hoveredArticle !== null ? 1.15 : 1
+            scale: (hoveredArticle !== null ? 1.15 : 1) * baseScale,
+            y: hoveredArticle !== null ? 0 : [0, -15, 0], // Subtle floating effect when not hovered
           }}
           transition={{
-            duration: 0.7,
-            ease: [0.16, 1, 0.3, 1] // Custom ease out for smooth scaling
+            scale: { duration: 0.7, ease: [0.16, 1, 0.3, 1] },
+            y: { duration: 6, repeat: Infinity, ease: "easeInOut" } // Slow breathing animation
           }}
           className="relative"
         >
@@ -436,15 +445,16 @@ export default function App() {
                 referrerPolicy="no-referrer"
               />
 
-              <div className="space-y-6 leading-relaxed text-[15px] md:text-[16px] text-[#aaa]">
-                <p>
-                  <strong className="text-white">引言：</strong> {articles[selectedArticle].intro || `这是关于“${articles[selectedArticle].title}”的详细内容。在这里，您可以阅读到完整的文章、访谈或项目记录。`}
+              <div className="space-y-8 leading-relaxed text-[15px] md:text-[17px] text-[#aaa] font-serif">
+                <p className="first-letter:text-5xl first-letter:font-bold first-letter:text-[#FF3300] first-letter:mr-3 first-letter:float-left">
+                  <strong className="text-white font-sans">引言：</strong> {articles[selectedArticle].intro || `这是关于“${articles[selectedArticle].title}”的详细内容。在这里，您可以阅读到完整的文章、访谈或项目记录。`}
                 </p>
                 <p>
                   {articles[selectedArticle].content || "在未来的实际应用中，这里将通过 CMS（内容管理系统）或 Markdown 文件动态加载真实的博客内容。排版可以包含多张图片、引言、粗体文本等丰富的富文本格式。我们的设计旨在提供最纯粹的阅读体验。"}
                 </p>
-                <blockquote className="border-l-2 border-[#FF3300] pl-6 py-2 my-8 text-white italic text-lg">
-                  “{articles[selectedArticle].quote || "设计理念：我们希望在保持首页极简和 3D 互动感的同时，为阅读提供一个沉浸、无干扰的环境。"}”
+                <blockquote className="relative border-l-4 border-[#FF3300] pl-8 py-4 my-12 text-white italic text-xl md:text-2xl bg-gradient-to-r from-[#FF3300]/10 to-transparent rounded-r-xl">
+                  <span className="absolute -top-4 -left-3 text-6xl text-[#FF3300] opacity-50 font-serif">"</span>
+                  {articles[selectedArticle].quote || "设计理念：我们希望在保持首页极简和 3D 互动感的同时，为阅读提供一个沉浸、无干扰的环境。"}
                 </blockquote>
                 <p>
                   随着数字时代的发展，信息的呈现方式变得和信息本身一样重要。我们通过精心设计的排版、恰到好处的留白以及流畅的过渡动画，让每一次点击都成为一次愉悦的探索。
@@ -468,7 +478,7 @@ export default function App() {
       </AnimatePresence>
 
       {/* Admin Controls */}
-      <div className="absolute top-8 right-12 z-[50] flex gap-4">
+      <div className="absolute top-8 right-6 md:right-6 z-[50] flex gap-4">
         {user ? (
           <>
             <button onClick={() => setIsComposing(true)} className="text-xs text-white bg-[#FF3300] px-4 py-2 rounded-full hover:bg-[#e62e00] transition-colors">发布文章</button>
@@ -492,7 +502,7 @@ export default function App() {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 20, opacity: 0 }}
-              className="bg-[#111] border border-[#333] w-full max-w-2xl rounded-2xl p-8 text-white relative shadow-2xl"
+              className="bg-[#111] border border-[#333] w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl p-6 md:p-8 text-white relative shadow-2xl [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
             >
               <button onClick={() => {
                 setIsComposing(false);
