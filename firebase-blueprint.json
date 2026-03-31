@@ -1,0 +1,82 @@
+{
+  "entities": {
+    "Article": {
+      "title": "Article",
+      "description": "A blog post or article entry.",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "The title of the article."
+        },
+        "link": {
+          "type": "string",
+          "description": "The link or anchor for the article."
+        },
+        "date": {
+          "type": "string",
+          "description": "The publication date."
+        },
+        "intro": {
+          "type": "string",
+          "description": "A short introduction or summary."
+        },
+        "content": {
+          "type": "string",
+          "description": "The main content of the article."
+        },
+        "quote": {
+          "type": "string",
+          "description": "A highlighted quote from the article."
+        },
+        "coverImage": {
+          "type": "string",
+          "description": "Base64 encoded cover image."
+        },
+        "contentImages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Array of base64 encoded content images."
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "description": "When the article was created."
+        },
+        "authorId": {
+          "type": "string",
+          "description": "The UID of the author."
+        }
+      },
+      "required": ["title", "createdAt", "authorId"]
+    },
+    "User": {
+      "title": "User",
+      "description": "A user of the application.",
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": ["admin", "user"],
+          "description": "The role of the user."
+        }
+      },
+      "required": ["role"]
+    }
+  },
+  "firestore": {
+    "/articles/{articleId}": {
+      "schema": {
+        "$ref": "#/entities/Article"
+      },
+      "description": "Collection of all published articles."
+    },
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/User"
+      },
+      "description": "Collection of user profiles."
+    }
+  }
+}
