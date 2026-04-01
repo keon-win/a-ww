@@ -233,21 +233,11 @@ export default function App() {
         {windowSize.width}px × {windowSize.height}px
       </div>
 
-      {/* Top Nav */}
-      <nav className="absolute top-8 left-1/2 -translate-x-1/2 flex gap-2 text-[10px] md:text-[11px] tracking-widest z-50">
-        <span className="text-white cursor-pointer">精选作品</span>
-        <span className="text-[#888] cursor-pointer hover:text-white transition-colors">档案 , 关于</span>
-      </nav>
 
-      {/* Left Metadata */}
       <div className="absolute left-6 md:left-12 top-[15%] md:top-[50%] md:-translate-y-1/2 flex flex-col md:flex-row gap-4 md:gap-16 text-[10px] md:text-[11px] tracking-wider leading-relaxed z-20 mix-blend-difference text-[#888]">
         <div>
-          <p className="mb-1">科伦丁·贝尔纳杜</p>
+          <p className="mb-1">china·陈</p>
           <p>自由开发者</p>
-        </div>
-        <div>
-          <p className="mb-1">期号: 003 / 系列: 2026</p>
-          <p>参考编号: EDI-032026-R02</p>
         </div>
       </div>
 
